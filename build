@@ -1,0 +1,5 @@
+#!/bin/sh
+
+CFLAGS="-fPIC -Wall $CFLAGS"
+LDFLAGS="-shared -llog -ldl $LDFLAGS"
+$CC $CFLAGS main.c $LDFLAGS -o libjniproxy.so

@@ -14,9 +14,6 @@ static int hooks_init();
 #define JNIPROXY_INIT hooks_init
 #include "jniproxy.c"
 
-#define max(a, b) ((a) > (b) ? (a) : (b))
-#define max3(a, b, c) (max(max(a, b), c))
-
 #define log_traceback(L, msg) \
     luaL_traceback_(L, L, msg, 1), \
     log1(lua_tolstring_(L, -1, 0)), \

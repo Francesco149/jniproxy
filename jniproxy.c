@@ -41,8 +41,6 @@
     chmod +x ./build
     CC=~/arm/bin/clang ./build
     # change clang path to where your arm compiler is
-    # you can also download a pre-built .so from github if you
-    # are on windows or don't want to compile
 
     adb root
     adb shell

@@ -70,7 +70,7 @@
     myhook.c
 
     ```c
-    int hooks_init();
+    static int hooks_init();
 
     #define JNIPROXY_IMPLEMENTATION
     #define JNIPROXY_MONOLITHIC

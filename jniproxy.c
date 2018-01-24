@@ -6,7 +6,8 @@
 
     introduction
     -----------------------------------------------------------
-    ARM hooking framework for love live school idol festival
+    ARM and x86 hooking framework for love live school idol
+    festival EN and JP
 
     ![](https://i.imgur.com/zcmcjD5.png)
 
@@ -39,17 +40,24 @@
 
     ```sh
     chmod +x ./build
-    CC=~/arm/bin/clang ./build
-    # change clang path to where your arm compiler is
+    CC=~/arm/bin/clang CFLAGS=-DJNIPROXY_EN /build
+    # change clang path to where your arm or x86 compiler is
+    # also change JNIPROXY_EN to JNIPROXY_JP if compiling for JP
 
     adb root
     adb shell
+
     cd /data/app/klb.lovelive_en-1/lib/arm/
+    # remember to omit the _en suffix if working with the JP ver
+
     mv libjniproxy.so libjniproxy.so.bak
     exit
     adb push libjniproxy.so /data/app/klb.lovelive_en-1/lib/arm/
     adb shell
+
     cd /data/app/klb.lovelive_en-1/lib/arm/
+    # remember to change arm to x86 if targeting x86
+
     chmod 755 libjniproxy.so
     chown system:system libjniproxy.so
 
@@ -70,6 +78,7 @@
     ```c
     static int hooks_init();
 
+    #define JNIPROXY_EN
     #define JNIPROXY_IMPLEMENTATION
     #define JNIPROXY_MONOLITHIC
     #define JNIPROXY_INIT hooks_init
@@ -134,19 +143,45 @@
 #ifndef JNIPROXY_H
 #define JNIPROXY_H
 
+#define JNIPROXY_ARM 1
+#define JNIPROXY_X86 2
+
+#if !defined(JNIPROXY_ARCH)
+# if defined(__arm__)
+#  define JNIPROXY_ARCH JNIPROXY_ARM
+# elif defined(__i386__)
+#  define JNIPROXY_ARCH JNIPROXY_X86
+# else
+#  error "unsupported architecture"
+# endif
+#endif
+
 #define JNIPROXY_VERSION_MAJOR 1
-#define JNIPROXY_VERSION_MINOR 0
+#define JNIPROXY_VERSION_MINOR 1
 #define JNIPROXY_VERSION_PATCH 0
 
+#if defined(JNIPROXY_EN)
 /* tested on the 20180106 dump */
+# define CLIENT_VERSION_MAJOR 14
+# define CLIENT_VERSION_MINOR 0
+# define CLIENT_VERSION_PATCH 76
 
-#define CLIENT_VERSION_MAJOR 14
-#define CLIENT_VERSION_MINOR 0
-#define CLIENT_VERSION_PATCH 76
+# define BUNDLE_VERSION_MAJOR 5
+# define BUNDLE_VERSION_MINOR 2
+# define BUNDLE_VERSION_PATCH 1
 
-#define BUNDLE_VERSION_MAJOR 5
-#define BUNDLE_VERSION_MINOR 2
-#define BUNDLE_VERSION_PATCH 1
+#elif defined(JNIPROXY_JP)
+/* tested on the 20180121 dump */
+# define CLIENT_VERSION_MAJOR 29
+# define CLIENT_VERSION_MINOR 6
+# define CLIENT_VERSION_PATCH 0
+
+# define BUNDLE_VERSION_MAJOR 5
+# define BUNDLE_VERSION_MINOR 5
+# define BUNDLE_VERSION_PATCH 0
+#else
+# error "define JNIPROXY_EN or JNIPROXY_JP to set the region"
+#endif
 
 #include <stdint.h>
 #include <stdio.h>
@@ -245,12 +280,19 @@ char* m_hexstr(uint8_t const* bytes, size_t n, char** p,
 
     if hook is null, no hooking will be performed but the trampoline
     will still be generated and the pattern will still be scanned
+
+    on x86 instruction size isn't constant, so the hook must be
+    padded with nops to al
 */
 JNIPROXYEXPORT
 int m_hook(char const* description,
     void* base, size_t size, void* address,
     const uint8_t* pattern, size_t pattern_size,
-    void** trampoline, void* hook);
+    void** trampoline, void* hook
+#if JNIPROXY_ARCH == JNIPROXY_X86
+    , size_t nops
+#endif
+);
 
 /*
     finds the base address in memory of a shared library given
@@ -276,6 +318,12 @@ void* m_base(char const* module_name, char const* known_export);
 
 #define JAVA_FUNC(func) \
     Java_klb_android_GameEngine_PFInterface_##func
+
+#if JNIPROXY_ARCH == JNIPROXY_X86
+typedef uint8_t code_t;
+#else
+typedef uint32_t code_t;
+#endif
 
 static void* lib = 0;
 static void* self = 0;
@@ -332,9 +380,21 @@ JNIPROXYEXPORT
 int m_hook(char const* description,
     void* base, size_t size, void* address,
     const uint8_t* pattern, size_t pattern_size,
-    void** trampoline, void* hook)
+    void** trampoline, void* hook
+#if JNIPROXY_ARCH == JNIPROXY_X86
+    , size_t nops
+#endif
+    )
 {
-    uint32_t* code = 0;
+#if JNIPROXY_ARCH == JNIPROXY_X86
+    size_t trampoline_size = 5 + nops + 5;
+    size_t hook_size = 5 + nops;
+#else
+    size_t trampoline_size = 4 * 4;
+    size_t hook_size = 2 * 4;
+#endif
+
+    code_t* code = 0;
     size_t i;
     uint8_t* u8base = (uint8_t*)base;
 
@@ -352,7 +412,7 @@ int m_hook(char const* description,
         uint8_t* absaddr = u8base + (uintptr_t)address;
 
         if (!memcmp(absaddr, pattern, pattern_size)) {
-            code = (uint32_t*)absaddr;
+            code = (code_t*)absaddr;
             goto scandone;
         }
 
@@ -368,7 +428,7 @@ int m_hook(char const* description,
     for (i = 0; i < size; ++i)
     {
         if (!memcmp(u8base + i, pattern, pattern_size)) {
-            code = (uint32_t*)(u8base + i);
+            code = (code_t*)(u8base + i);
             break;
         }
     }
@@ -379,29 +439,44 @@ int m_hook(char const* description,
     }
 
 scandone:
+#if JNIPROXY_ARCH == JNIPROXY_X86
+    log("%p: %02X %02X %02X %02X %02X",
+        code, code[0], code[1], code[2], code[3], code[4]);
+#else
     log("%p: %08X %08X", code, code[0], code[1]);
+#endif
 
     if (trampoline)
     {
-        uint32_t* trampoline_code;
+        code_t* trampoline_code;
 
         log1("generating trampoline");
 
-        trampoline_code = (uint32_t*)malloc(4 * 4);
+        trampoline_code = (code_t*)malloc(trampoline_size);
         if (!trampoline_code) {
             log1("out of memory");
             return -1;
         }
 
-        if (m_rwx(trampoline_code, 4 * 4) < 0)
+        if (m_rwx(trampoline_code, trampoline_size) < 0)
         {
             perror("mprotect");
             return -1;
         }
 
-        memcpy(trampoline_code, code, 4 * 2);
+        memcpy(trampoline_code, code, hook_size);
+
+#if JNIPROXY_ARCH == JNIPROXY_X86
+        /* jmp func + hook_size */
+        trampoline_code[hook_size] = 0xE9;
+        *(int32_t*)(trampoline_code + hook_size + 1) =
+            (int32_t)code + hook_size
+            - (int32_t)(trampoline_code + hook_size) - 5;
+#else
         trampoline_code[2] = 0xE51FF004; /* ldr pc,[pc,#-4] */
         trampoline_code[3] = (uint32_t)(code + 2);
+#endif
+
         *trampoline = trampoline_code;
     }
 
@@ -411,13 +486,23 @@ scandone:
 
     log1("making memory rwx");
 
-    if (m_rwx(code, 8) < 0) {
+    if (m_rwx(code, hook_size) < 0) {
         perror("mprotect");
         return -1;
     }
 
+#if JNIPROXY_ARCH == JNIPROXY_X86
+    /* jmp hook */
+    code[0] = 0xE9;
+    *(int32_t*)(code + 1) = (int32_t)hook - (int32_t)code - 5;
+
+    for (i = 0; i < nops; ++i) {
+        code[5 + i] = 0x90; /* nop */
+    }
+#else
     code[0] = 0xE51FF004; /* ldr pc,[pc,#-4] */
     code[1] = (uint32_t)hook;
+#endif
 
     log("hooked %p -> %p", code, hook);
 
@@ -481,7 +566,9 @@ char const* const functions[] = {
     j(clientResumeGame),
     j(internalGetLocalizedMessage),
     "Java_extension_klb_LovelivePlatformGameAccountsIntegration_PFInterface_pfExtensionCallback",
+#ifdef JNIPROXY_EN
     "Java_extension_klb_PfGameAccount_PFInterface_gpgsExtensionCallback",
+#endif
     0
 };
 
@@ -494,14 +581,14 @@ int generate_trampoline(char const* name)
 {
     int err;
     void* func;
-    uint32_t* trampoline;
+    code_t* trampoline;
 
     func = dlsym_(lib, name, &err);
     if (err) {
         return -1;
     }
 
-    trampoline = (uint32_t*)dlsym_(self, name, &err);
+    trampoline = (code_t*)dlsym_(self, name, &err);
     if (err) {
         return -1;
     }
@@ -516,7 +603,12 @@ int generate_trampoline(char const* name)
         return -1;
     }
 
+#if JNIPROXY_ARCH == JNIPROXY_X86
+    *(int32_t*)(trampoline + 1) =
+        (int32_t)func - (int32_t)trampoline - 5;
+#else
     trampoline[1] = (uint32_t)func;
+#endif
 
     return 0;
 }
@@ -646,11 +738,18 @@ void __attribute__((destructor)) cleanup()
     }
 }
 
+#if JNIPROXY_ARCH == JNIPROXY_X86
+#define t(x) \
+nvoid x() { \
+    asm("jmp 0xBAADF00D"); \
+}
+#else
 #define t(x) \
 nvoid x() { \
     asm("ldr pc,[pc,#-4]"); \
     asm(".word 0xBAADF00D"); \
 }
+#endif
 #define j(x) t(JAVA_FUNC(x))
 
 /*

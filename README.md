@@ -5,7 +5,8 @@ refer to the attached UNLICENSE or http://unlicense.org/
 
 introduction
 -----------------------------------------------------------
-ARM hooking framework for love live school idol festival
+ARM and x86 hooking framework for love live school idol
+festival EN and JP
 
 ![](https://i.imgur.com/zcmcjD5.png)
 
@@ -38,17 +39,24 @@ write a guide and pull request
 
 ```sh
 chmod +x ./build
-CC=~/arm/bin/clang ./build
-# change clang path to where your arm compiler is
+CC=~/arm/bin/clang CFLAGS=-DJNIPROXY_EN /build
+# change clang path to where your arm or x86 compiler is
+# also change JNIPROXY_EN to JNIPROXY_JP if compiling for JP
 
 adb root
 adb shell
+
 cd /data/app/klb.lovelive_en-1/lib/arm/
+# remember to omit the _en suffix if working with the JP ver
+
 mv libjniproxy.so libjniproxy.so.bak
 exit
 adb push libjniproxy.so /data/app/klb.lovelive_en-1/lib/arm/
 adb shell
+
 cd /data/app/klb.lovelive_en-1/lib/arm/
+# remember to change arm to x86 if targeting x86
+
 chmod 755 libjniproxy.so
 chown system:system libjniproxy.so
 
@@ -69,6 +77,7 @@ myhook.c
 ```c
 static int hooks_init();
 
+#define JNIPROXY_EN
 #define JNIPROXY_IMPLEMENTATION
 #define JNIPROXY_MONOLITHIC
 #define JNIPROXY_INIT hooks_init

@@ -173,7 +173,7 @@
 #elif defined(JNIPROXY_JP)
 /* tested on the 20180319 dump */
 # define CLIENT_VERSION_MAJOR 31
-# define CLIENT_VERSION_MINOR 0
+# define CLIENT_VERSION_MINOR 1
 # define CLIENT_VERSION_PATCH 0
 
 # define BUNDLE_VERSION_MAJOR 5

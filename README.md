@@ -39,7 +39,7 @@ write a guide and pull request
 
 ```sh
 chmod +x ./build
-CC=~/arm/bin/clang CFLAGS=-DJNIPROXY_EN /build
+CC=~/arm/bin/clang CFLAGS=-DJNIPROXY_EN ./build
 # change clang path to where your arm or x86 compiler is
 # also change JNIPROXY_EN to JNIPROXY_JP if compiling for JP
 
@@ -47,7 +47,8 @@ adb root
 adb shell
 
 cd /data/app/klb.lovelive_en-1/lib/arm/
-# remember to omit the _en suffix if working with the JP ver
+# remember to omit the _en suffix and use x86 instead of
+# arm if working with the JP ver
 
 mv libjniproxy.so libjniproxy.so.bak
 exit

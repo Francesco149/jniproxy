@@ -1,0 +1,20 @@
+#!/bin/sh
+
+# personal script, requires https://github.com/Francesco149/siftools ,
+# termux, pre-configured jp/en siftools rc files and a proxy.sh script
+# in your home that copies ~/libjniproxy.so and creates libjniproxy.so.bak
+
+host="${SIF_SSH_HOST-192.168.1.174}"
+port=${SIF_SSH_HOST-8022}
+androidcc=~/android-arm/bin/clang
+export SSH_ASKPASS=${SSH_ASKPASS-ksshaskpass}
+
+eval $(ssh-agent) && \
+ssh-add </dev/null && \
+CFLAGS=-DJNIPROXY_EN \
+CC=${androidcc} \
+./build && \
+scp -P${port} libjniproxy.so "${host}:" && \
+ssh -p ${port} "${host}" '${HOME}/proxy.sh' && \
+ssh -p ${port} "${host}" 'ln -svf sifrc.en ${HOME}/.sifrc' && \
+ssh -p ${port} "${host}" 'sif start'

@@ -161,14 +161,14 @@
 #define JNIPROXY_VERSION_PATCH 0
 
 #if defined(JNIPROXY_EN)
-/* tested on the 20180327 dump */
-# define CLIENT_VERSION_MAJOR 15
+/* tested on the 20180724 dump */
+# define CLIENT_VERSION_MAJOR 16
 # define CLIENT_VERSION_MINOR 0
-# define CLIENT_VERSION_PATCH 0
+# define CLIENT_VERSION_PATCH 79
 
-# define BUNDLE_VERSION_MAJOR 5
-# define BUNDLE_VERSION_MINOR 5
-# define BUNDLE_VERSION_PATCH 1
+# define BUNDLE_VERSION_MAJOR 6
+# define BUNDLE_VERSION_MINOR 0
+# define BUNDLE_VERSION_PATCH 2
 
 #elif defined(JNIPROXY_JP)
 /* tested on the 20180319 dump */

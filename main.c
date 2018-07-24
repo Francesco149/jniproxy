@@ -653,7 +653,7 @@ AOB = {
 #else
 AOB = {
     0xF0, 0x4F, 0x2D, 0xE9, 0x74, 0xD0, 0x4D, 0xE2,
-    0x01, 0xDB, 0x4D, 0xE2, 0x9C, 0x09, 0x9F, 0xE5
+    0x01, 0xDB, 0x4D, 0xE2, 0xA4, 0x09, 0x9F, 0xE5
 };
 #endif
 
@@ -733,22 +733,22 @@ int hooks_init()
         m_hook(#b, base, 0x04000000, \
             (void*)a, b##aob, sizeof(b##aob), (void**)&b, 0)
 
-    err |= h(0x002EBA84, HMAC_SHA1_);
-    err |= h(0x0028E348, CKLBUtility__SHA1BigEndianDWords_);
-    err |= h(0x002EE060, make_auth_stuff_);
-    err |= h(0x00291490, base64_encode_wrapper_);
-    err |= h(0x002EDEE0, encrypt_string_);
-    err |= h(0x002914B4, base64_decode_wrapper_);
-    err |= h(0x002EDCB8, generate_key_);
-    err |= h(0x00349D08, CAndroidRequest__getRandomBytes_);
-    err |= h(0x003127A8, CKLBLuaLibCRYPTO__luaRandomBytes_);
-    err |= h(0x0030FC34, CKLBLuaLibCRYPTO__luaXorCipher_);
-    err |= h(0x0033EF60, CAndroidRequest__callJavaMethod_);
-    err |= t(0x00243FC8, luaL_traceback_);
-    err |= t(0x0025D59C, lua_tolstring_);
-    err |= t(0x0025C120, lua_settop_);
-    err |= t(0x0025C104, lua_gettop_);
-    err |= t(0x0025CAB8, lua_isstring_);
+    err |= h(0x002F83B4, HMAC_SHA1_);
+    err |= h(0x00291974, CKLBUtility__SHA1BigEndianDWords_);
+    err |= h(0x002FAAA8, make_auth_stuff_);
+    err |= h(0x00291930, base64_encode_wrapper_);
+    err |= h(0x002FA928, encrypt_string_);
+    err |= h(0x00291954, base64_decode_wrapper_);
+    err |= h(0x002FA700, generate_key_);
+    err |= h(0x003588F0, CAndroidRequest__getRandomBytes_);
+    err |= h(0x0031F028, CKLBLuaLibCRYPTO__luaRandomBytes_);
+    err |= h(0x0031C4B4, CKLBLuaLibCRYPTO__luaXorCipher_);
+    err |= h(0x0034D1D4, CAndroidRequest__callJavaMethod_);
+    err |= t(0x002448A0, luaL_traceback_);
+    err |= t(0x0025DE74, lua_tolstring_);
+    err |= t(0x0025C9F8, lua_settop_);
+    err |= t(0x0025C9DC, lua_gettop_);
+    err |= t(0x0025D390, lua_isstring_);
 #endif
 
     if (err) {

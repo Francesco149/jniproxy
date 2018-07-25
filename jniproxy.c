@@ -50,7 +50,8 @@
     adb shell
 
     cd /data/app/klb.lovelive_en-1/lib/arm/
-    # remember to omit the _en suffix if working with the JP ver
+    # remember to omit the _en suffix and use x86 instead of
+    # arm if working with the JP ver
 
     mv libjniproxy.so libjniproxy.so.bak
     exit

@@ -42,7 +42,7 @@
 
     ```sh
     chmod +x ./build
-    CC=~/arm/bin/clang CFLAGS=-DJNIPROXY_EN /build
+    CC=~/arm/bin/clang CFLAGS=-DJNIPROXY_EN ./build
     # change clang path to where your arm or x86 compiler is
     # also change JNIPROXY_EN to JNIPROXY_JP if compiling for JP
 

@@ -20,6 +20,8 @@
     function and a few others as well as printing the lua
     stacktrace for functions called from lua
 
+    (update: it now also logs http traffic on JP)
+
     rationale: I couldn't get LD_PRELOAD to work on my qemu
     android x86 virtual machine and I'm too lazy to use a real
     android device lol

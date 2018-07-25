@@ -160,8 +160,8 @@
 #endif
 
 #define JNIPROXY_VERSION_MAJOR 1
-#define JNIPROXY_VERSION_MINOR 1
-#define JNIPROXY_VERSION_PATCH 1
+#define JNIPROXY_VERSION_MINOR 2
+#define JNIPROXY_VERSION_PATCH 0
 
 #if defined(JNIPROXY_EN)
 /* tested on the 20180724 dump */
@@ -196,12 +196,11 @@
 
 /* logging functions, they print to logcat */
 
+void log_impl(char const* file, int line, char const* func,
+    char const* fmt, ...);
+
 #define log(fmt, ...) \
-    __android_log_print( \
-        ANDROID_LOG_DEBUG, WHOAMI, \
-        "[%s:%d:%s] " fmt, __FILE__, __LINE__, __func__, \
-        __VA_ARGS__ \
-    )
+    log_impl(__FILE__, __LINE__, __func__, fmt, __VA_ARGS__)
 
 #define log1(msg) log("%s", msg)
 #define log_return_address() \
@@ -318,6 +317,27 @@ void* m_base(char const* module_name, char const* known_export);
 
 #include <stdlib.h>
 #include <string.h>
+
+/*
+ * seems like log_print has a line length limit which causes large
+ * output to be truncated, so i wrote this crappy wrapper
+ */
+
+char log_buf[16 * 1024 * 1024];
+
+void log_impl(char const* file, int line, char const* func,
+    char const* fmt, ...)
+{
+    va_list va;
+    char* p = log_buf;
+
+    p += sprintf(p, "[%s:%d:%s] ", file, line, func);
+    va_start(va, fmt);
+    p += vsnprintf(p, sizeof(log_buf) - 1, fmt, va);
+    va_end(va);
+
+    __android_log_write(ANDROID_LOG_DEBUG, WHOAMI, log_buf);
+}
 
 #define JAVA_FUNC(func) \
     Java_klb_android_GameEngine_PFInterface_##func

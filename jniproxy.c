@@ -158,7 +158,7 @@
 
 #define JNIPROXY_VERSION_MAJOR 1
 #define JNIPROXY_VERSION_MINOR 1
-#define JNIPROXY_VERSION_PATCH 0
+#define JNIPROXY_VERSION_PATCH 1
 
 #if defined(JNIPROXY_EN)
 /* tested on the 20180724 dump */
@@ -449,6 +449,11 @@ scandone:
     if (trampoline)
     {
         code_t* trampoline_code;
+
+        if (!hook) {
+            *trampoline = code;
+            return 0;
+        }
 
         log1("generating trampoline");
 

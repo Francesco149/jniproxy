@@ -63,9 +63,16 @@ cd /data/app/klb.lovelive_en-1/lib/arm/
 chmod 755 libjniproxy.so
 chown system:system libjniproxy.so
 
-# start the game and do whatever you need to log
+# clear logcat
+adb shell logcat -c
 
-adb shell logcat -d | grep jniproxy
+# start logging
+adb shell logcat | grep jniproxy
+
+# now start the game and watch the log
+# I usually pipe the above command into a file, like
+# adb shell logcat -d | grep jniproxy > log.txt
+# so you can read it in your favorite editor
 ```
 
 framework

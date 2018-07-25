@@ -171,13 +171,13 @@
 # define BUNDLE_VERSION_PATCH 2
 
 #elif defined(JNIPROXY_JP)
-/* tested on the 20180319 dump */
-# define CLIENT_VERSION_MAJOR 32
+/* tested on the 20180724 dump */
+# define CLIENT_VERSION_MAJOR 34
 # define CLIENT_VERSION_MINOR 2
 # define CLIENT_VERSION_PATCH 0
 
 # define BUNDLE_VERSION_MAJOR 6
-# define BUNDLE_VERSION_MINOR 0
+# define BUNDLE_VERSION_MINOR 2
 # define BUNDLE_VERSION_PATCH 0
 #else
 # error "define JNIPROXY_EN or JNIPROXY_JP to set the region"
@@ -557,7 +557,6 @@ char const* const functions[] = {
     j(rotateScreenOrientation),
     j(toNativeSignal),
     j(getGLVersion),
-    j(transformSignature),
     j(resetViewport),
     j(onActivityPause),
     j(onActivityResume),
@@ -565,8 +564,9 @@ char const* const functions[] = {
     j(WebViewControlEvent),
     j(clientResumeGame),
     j(internalGetLocalizedMessage),
-    "Java_extension_klb_LovelivePlatformGameAccountsIntegration_PFInterface_pfExtensionCallback",
 #ifdef JNIPROXY_EN
+    j(transformSignature),
+    "Java_extension_klb_LovelivePlatformGameAccountsIntegration_PFInterface_pfExtensionCallback",
     "Java_extension_klb_PfGameAccount_PFInterface_gpgsExtensionCallback",
 #endif
     0
@@ -771,7 +771,6 @@ j(inputDeviceKey)
 j(rotateScreenOrientation)
 j(toNativeSignal)
 j(getGLVersion)
-j(transformSignature)
 j(resetViewport)
 j(onActivityPause)
 j(onActivityResume)
@@ -779,8 +778,11 @@ j(clientControlEvent)
 j(WebViewControlEvent)
 j(clientResumeGame)
 j(internalGetLocalizedMessage)
+#ifdef JNIPROXY_EN
+j(transformSignature),
 t(Java_extension_klb_LovelivePlatformGameAccountsIntegration_PFInterface_pfExtensionCallback)
 t(Java_extension_klb_PfGameAccount_PFInterface_gpgsExtensionCallback)
+#endif
 
 #undef t
 #undef j

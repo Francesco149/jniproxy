@@ -687,6 +687,223 @@ exit:
 
 /* ------------------------------------------------------------- */
 
+#define f CAndroidRequest__publicKeyEncrypt_
+#define sig(name) \
+int name(void *this, uint8_t const* data, int len, \
+    uint8_t* result, int result_size)
+
+#if JNIPROXY_ARCH == JNIPROXY_X86
+AOB = {
+    0x53,
+    0x57,
+    0x56,
+    0x83, 0xEC, 0x40,
+    0xE8, 0x00, 0x00, 0x00, 0x00,
+    0x5B,
+    0x81, 0xC3, 0xFD, 0xB1, 0x19, 0x00 /* TODO: wildcard this */
+};
+#endif
+
+TRAMPOLINE
+
+HOOK {
+    int res;
+    char* buf = 0;
+    size_t nb = 0;
+
+    log_return_address();
+    log("data: %s", data);
+    log_bytes("data", data, len, &buf, &nb);
+    res = f(this, data, len, result, result_size);
+    log_bytes("result", result, res, &buf, &nb);
+    free(buf);
+
+    return res;
+}
+
+#undef sig
+#undef f
+
+/* ------------------------------------------------------------- */
+
+#define f curl_easy_setopt_
+#define sig(name) \
+int __cdecl name(void* handle, CURLoption option, ...)
+
+#define CURLOPTTYPE_LONG          0
+#define CURLOPTTYPE_FUNCTIONPOINT 20000
+
+#define CINIT(na,t,nu) CURLOPT_ ## na = CURLOPTTYPE_ ## t + nu
+
+typedef enum
+{
+    CINIT(DEBUGFUNCTION, FUNCTIONPOINT, 94),
+    CINIT(VERBOSE, LONG, 41),
+}
+CURLoption;
+
+TRAMPOLINE
+
+#if JNIPROXY_ARCH == JNIPROXY_X86
+AOB = {
+    0x53,
+    0xE8, 0x2A, 0x66, 0xD6, 0xFF
+};
+#endif
+
+#undef sig
+#undef f
+
+/* ------------------------------------------------------------- */
+
+#define f Curl_open_
+#define sig(name) \
+int __cdecl name(void* data)
+
+TRAMPOLINE
+
+#if JNIPROXY_ARCH == JNIPROXY_X86
+AOB = {
+    0x8D, 0x64, 0x24, 0xD4,
+    0x89, 0x5C, 0x24, 0x1C,
+    0x89, 0x74, 0x24, 0x20,
+    0xE8, 0x5F, 0x68, 0xD5, 0xFF
+};
+#endif
+
+#undef sig
+#undef f
+
+/* ------------------------------------------------------------- */
+
+#define f curl_global_init_
+#define sig(name) \
+int __cdecl name(int a1)
+
+#define CURL_GLOBAL_SSL (1<<0)
+#define CURL_GLOBAL_WIN32 (1<<1)
+#define CURL_GLOBAL_ALL (CURL_GLOBAL_SSL|CURL_GLOBAL_WIN32)
+#define CURL_GLOBAL_DEFAULT CURL_GLOBAL_ALL
+
+#if JNIPROXY_ARCH == JNIPROXY_X86
+AOB = {
+    0x53,
+    0xE8, 0x0A, 0x68, 0xD6, 0xFF
+};
+#endif
+
+TRAMPOLINE
+
+#undef sig
+#undef f
+
+/* ------------------------------------------------------------- */
+
+#define f curl_easy_init_
+#define sig(name) \
+void* name()
+
+#if JNIPROXY_ARCH == JNIPROXY_X86
+AOB = {
+    0x53,
+    0xE8, 0x7A, 0x66, 0xD6, 0xFF
+};
+#endif
+
+TRAMPOLINE
+
+typedef enum
+{
+    CURLINFO_TEXT = 0,
+    CURLINFO_HEADER_IN,    /* 1 */
+    CURLINFO_HEADER_OUT,   /* 2 */
+    CURLINFO_DATA_IN,      /* 3 */
+    CURLINFO_DATA_OUT,     /* 4 */
+    CURLINFO_SSL_DATA_IN,  /* 5 */
+    CURLINFO_SSL_DATA_OUT, /* 6 */
+    CURLINFO_END
+}
+curl_infotype;
+
+int curl_dump(void* handle, curl_infotype type, char* data,
+    size_t size, void* userp)
+{
+    char const* text = "?? Unknown";
+
+    (void)handle;
+    (void)userp;
+
+    switch (type) {
+    case CURLINFO_HEADER_OUT:
+        text = "=> Send header";
+        break;
+    case CURLINFO_DATA_OUT:
+        text = "=> Send data";
+        break;
+    case CURLINFO_SSL_DATA_OUT:
+        text = "=> Send SSL data";
+        break;
+    case CURLINFO_HEADER_IN:
+        text = "<= Recv header";
+        break;
+    case CURLINFO_DATA_IN:
+        text = "<= Recv data";
+        break;
+    case CURLINFO_SSL_DATA_IN:
+        text = "<= Recv SSL data";
+        break;
+    default:
+    case CURLINFO_TEXT:
+        return 0;
+    }
+
+    log("(%s) %s", text, data);
+
+    return 0;
+}
+
+int* pcurl_initialized = 0;
+
+/* for some reason the trampoline crashes so i rewrote the func */
+/* most likely rip-relative stuff that I didn't notice */
+void* original_curl_easy_init()
+{
+    int result;
+    void* data;
+
+    if (!*pcurl_initialized)
+    {
+        result = curl_global_init_(CURL_GLOBAL_DEFAULT);
+        if (result) {
+            return 0;
+        }
+    }
+
+    result = Curl_open_(&data);
+    if (result) {
+        return 0;
+    }
+
+    return data;
+}
+
+HOOK {
+    void* res;
+
+    log_return_address();
+    res = original_curl_easy_init();
+
+    curl_easy_setopt_(res, CURLOPT_DEBUGFUNCTION, curl_dump);
+    curl_easy_setopt_(res, CURLOPT_VERBOSE, 1L);
+
+    return res;
+}
+
+#undef sig
+#undef f
+
+/* ------------------------------------------------------------- */
+
 static
 int hooks_init()
 {
@@ -719,11 +936,19 @@ int hooks_init()
     err |= h(0x001D1150, CKLBLuaLibCRYPTO__luaRandomBytes_, 2);
     err |= h(0x001D09B0, CKLBLuaLibCRYPTO__luaXorCipher_, 2);
     err |= h(0x0025E4D0, CAndroidRequest__callJavaMethod_, 5);
+    err |= h(0x0026C0D0, CAndroidRequest__publicKeyEncrypt_, 1);
+    err |= h(0x002C3780, curl_easy_init_, 1);
     err |= t(0x0008D8F0, luaL_traceback_, 5);
     err |= t(0x0008B6A0, lua_tolstring_, 2);
     err |= t(0x0008A790, lua_settop_, 0);
     err |= t(0x0008A770, lua_gettop_, 2);
     err |= t(0x0008AE60, lua_isstring_, 1);
+    err |= t(0x002C37D0, curl_easy_setopt_, 1);
+    err |= t(0x002D3590, Curl_open_, 3);
+    err |= t(0x002C35F0, curl_global_init_, 1);
+
+    /* can be found in the original curl_easy_init */
+    pcurl_initialized = (int*)((char*)base + 0x004B84CC);
 #else
     #define h(a, b) \
         m_hook(#b, base, 0x04000000, \

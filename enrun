@@ -5,7 +5,7 @@
 # in your home that copies ~/libjniproxy.so and creates libjniproxy.so.bak
 
 host="${SIF_SSH_HOST-192.168.1.76}"
-port=${SIF_SSH_HOST-8022}
+port=${SIF_SSH_PORT-8022}
 androidcc=~/android-arm/bin/clang
 export SSH_ASKPASS=${SSH_ASKPASS-ksshaskpass}
 

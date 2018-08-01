@@ -814,7 +814,7 @@ j(WebViewControlEvent)
 j(clientResumeGame)
 j(internalGetLocalizedMessage)
 #ifdef JNIPROXY_EN
-j(transformSignature),
+j(transformSignature)
 t(Java_extension_klb_LovelivePlatformGameAccountsIntegration_PFInterface_pfExtensionCallback)
 t(Java_extension_klb_PfGameAccount_PFInterface_gpgsExtensionCallback)
 #endif

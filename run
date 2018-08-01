@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# personal script, requires https://github.com/Francesco149/siftools ,
+# termux, pre-configured jp/en siftools rc files and a proxy.sh script
+# in your home that copies ~/libjniproxy.so and creates libjniproxy.so.bak
+# remember to export CC, CFLAGS, SIF_LIBDIR, SIF_RCNAME
+# you can also run from ./enrun or ./jprun which automatically export those
+
+host="${SIF_SSH_HOST-192.168.1.76}"
+port=${SIF_SSH_PORT-8022}
+export SSH_ASKPASS=${SSH_ASKPASS-ksshaskpass}
+
+eval $(ssh-agent) && \
+ssh-add </dev/null && \
+./build && \
+scp -P${port} libjniproxy.so "${host}:" && \
+ssh -p ${port} "${host}" \
+    "cd && SIF_LIBDIR=${SIF_LIBDIR} SIF_RCNAME=${SIF_RCNAME} ./proxy.sh"

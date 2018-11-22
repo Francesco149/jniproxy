@@ -197,6 +197,8 @@
 #include <stdio.h>
 #include <android/log.h>
 #include <sys/mman.h>
+#include <sys/sysconf.h>
+#include <errno.h>
 #include <dlfcn.h>
 
 /* ------------------------------------------------------------- */

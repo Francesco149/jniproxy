@@ -829,6 +829,7 @@ int curl_dump(void* handle, curl_infotype type, char* data,
     size_t size, void* userp)
 {
     char const* text = "?? Unknown";
+    char* sdata;
 
     (void)handle;
     (void)userp;
@@ -857,7 +858,13 @@ int curl_dump(void* handle, curl_infotype type, char* data,
         return 0;
     }
 
-    log("(%s) %s", text, data);
+    sdata = malloc(size + 1);
+    if (sdata) {
+        memcpy(sdata, data, size);
+        sdata[size] = 0;
+    }
+    log("(%s) %s", text, sdata);
+    free(sdata);
 
     return 0;
 }

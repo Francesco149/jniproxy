@@ -6,7 +6,7 @@
 # remember to export CC, CFLAGS, SIF_LIBDIR, SIF_RCNAME
 # you can also run from ./enrun or ./jprun which automatically export those
 
-host="${SIF_SSH_HOST-192.168.1.76}"
+host="${SIF_SSH_HOST-192.168.1.174}"
 port=${SIF_SSH_PORT-8022}
 export SSH_ASKPASS=${SSH_ASKPASS-ksshaskpass}
 
@@ -16,3 +16,4 @@ ssh-add </dev/null && \
 scp -P${port} libjniproxy.so "${host}:" && \
 ssh -p ${port} "${host}" \
     "cd && SIF_LIBDIR=${SIF_LIBDIR} SIF_RCNAME=${SIF_RCNAME} ./proxy.sh"
+ssh -p ${port} "${host}" "su -c 'logcat | grep jniproxy'"

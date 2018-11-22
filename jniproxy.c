@@ -181,13 +181,13 @@
 # define BUNDLE_VERSION_PATCH 2
 
 #elif defined(JNIPROXY_JP)
-/* tested on the 20180724 dump */
+/* tested on the 20181122 dump */
 # define CLIENT_VERSION_MAJOR 34
 # define CLIENT_VERSION_MINOR 2
 # define CLIENT_VERSION_PATCH 0
 
 # define BUNDLE_VERSION_MAJOR 6
-# define BUNDLE_VERSION_MINOR 2
+# define BUNDLE_VERSION_MINOR 4
 # define BUNDLE_VERSION_PATCH 0
 #else
 # error "define JNIPROXY_EN or JNIPROXY_JP to set the region"

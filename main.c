@@ -938,7 +938,7 @@ int hooks_init()
     err |= h(0x002AB320, CAndroidRequest__callJavaMethod_, 5);
     err |= h(0x002B9D20, CAndroidRequest__publicKeyEncrypt_, 1);
     err |= h(0x003115D0, curl_easy_init_, 1);
-    err |= t(0x003115D0, luaL_traceback_, 5);
+    err |= t(0x0008E340, luaL_traceback_, 5);
     err |= t(0x0008C0F0, lua_tolstring_, 2);
     err |= t(0x0008B1E0, lua_settop_, 0);
     err |= t(0x0008B1C0, lua_gettop_, 2);

@@ -182,7 +182,7 @@
 
 #elif defined(JNIPROXY_JP)
 /* tested on the 20181122 dump */
-# define CLIENT_VERSION_MAJOR 34
+# define CLIENT_VERSION_MAJOR 36
 # define CLIENT_VERSION_MINOR 2
 # define CLIENT_VERSION_PATCH 0
 

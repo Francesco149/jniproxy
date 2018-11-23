@@ -171,14 +171,14 @@
 #define JNIPROXY_VERSION_PATCH 0
 
 #if defined(JNIPROXY_EN)
-/* tested on the 20180724 dump */
-# define CLIENT_VERSION_MAJOR 16
+/* tested on the 20181122 dump */
+# define CLIENT_VERSION_MAJOR 17
 # define CLIENT_VERSION_MINOR 0
-# define CLIENT_VERSION_PATCH 79
+# define CLIENT_VERSION_PATCH 1
 
 # define BUNDLE_VERSION_MAJOR 6
-# define BUNDLE_VERSION_MINOR 0
-# define BUNDLE_VERSION_PATCH 2
+# define BUNDLE_VERSION_MINOR 3
+# define BUNDLE_VERSION_PATCH 0
 
 #elif defined(JNIPROXY_JP)
 /* tested on the 20181122 dump */
@@ -602,7 +602,6 @@ char const* const functions[] = {
     j(clientResumeGame),
     j(internalGetLocalizedMessage),
 #ifdef JNIPROXY_EN
-    j(transformSignature),
     "Java_extension_klb_LovelivePlatformGameAccountsIntegration_PFInterface_pfExtensionCallback",
     "Java_extension_klb_PfGameAccount_PFInterface_gpgsExtensionCallback",
 #endif
